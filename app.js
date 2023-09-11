@@ -36,8 +36,8 @@ function shuffle(array) {
   return array;
 }
 
-// let shuffledColors = shuffle(COLORS);
-let shuffledColors = COLORS;
+let shuffledColors = shuffle(COLORS);
+
 let counter = 0;
 
 // this function loops over the array of colors
@@ -87,27 +87,27 @@ function handleCardClick(event) {
     console.log("1", clickedCards);
     clickedCards.push(clickedCard);
     console.log("2",clickedCards);
-    // if (clickedCards.length >=2
-    //     && ! haveSameClassValue(clickedCards)
-    //     ){
-    //         console.log("hi", haveSameClassValue(clickedCards));
-    //         console.log("you just clicked", clickedCard);
-    //         setTimeout(function(){
-    //             clickedCards.forEach(div => div.style.backgroundColor = 'blue');
-    //             clickedCards.splice(0,clickedCards.length);
-    //         }, 1000);
+    if (clickedCards.length >=2
+        && ! haveSameClassValue(clickedCards)
+        ){
+            console.log("hi", haveSameClassValue(clickedCards));
+            console.log("you just clicked", clickedCard);
+            setTimeout(function(){
+                clickedCards.forEach(div => div.style.backgroundColor = 'blue');
+                clickedCards.splice(0,clickedCards.length);
+            }, 1000);
     
-    // }
-    // if (clickedCards.length >= 2
-    //     && haveSameClassValue(clickedCards)
-    //     ){
+    }
+    if (clickedCards.length >= 2
+        && haveSameClassValue(clickedCards)
+        ){
             
-    //         foundCards.push(clickedCards);
-    //         console.log("match!");
-    //         console.log("you just clicked", clickedCard);
+            foundCards.push(clickedCards);
+            console.log("match!");
+            console.log("you just clicked", clickedCard);
         
-    //         clickedCards.splice(0,clickedCards.length);
-    //   }
+            clickedCards.splice(0,clickedCards.length);
+      }
 }
 
 // haveSameClassValue(clickedCards);
@@ -131,26 +131,11 @@ function displayFoundCards(cards){
 
 
 function haveSameClassValue(arr) {
-    const classValues = {};
-    let counter = 0;
-
-    for (let i = 0; i < arr.length; i++) {
-        const classList = Array.from(arr[i].classList);
-        console.log(classList)
-        
-        classList.forEach(className => {
-            if (classValues[className]) {
-                classValues[className]++;
-                if (classValues[className] === 2) counter++;
-            } else {
-                classValues[className] = 1;
-            }
-        });
-
-        if (counter >= 2) return true;
-    }
-
+  if (arr[0].className === arr[1].className){
+    return true;
+  } else {
     return false;
+  }
 }
 
 // when the DOM loads
