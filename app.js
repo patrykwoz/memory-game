@@ -1,33 +1,12 @@
 const gameContainer = document.getElementById("game");
+const body = document.body;
 
-const COLORS = [
-  "red",
-  "blue",
-  "green",
-  "orange",
-  "purple",
-  "red",
-  "blue",
-  "green",
-  "orange",
-  "purple"
-];
-
-// here is a helper function to shuffle an array
-// it returns the same array with values shuffled
-// it is based on an algorithm called Fisher Yates if you want ot research more
 function shuffle(array) {
   let counter = array.length;
 
-  // While there are elements in the array
   while (counter > 0) {
-    // Pick a random index
     let index = Math.floor(Math.random() * counter);
-
-    // Decrease counter by 1
     counter--;
-
-    // And swap the last element with it
     let temp = array[counter];
     array[counter] = array[index];
     array[index] = temp;
@@ -36,107 +15,190 @@ function shuffle(array) {
   return array;
 }
 
-let shuffledColors = shuffle(COLORS);
-
+let shuffledColors = [];
 let counter = 0;
+let score = 0;
+let toWin = 0;
+let timer = 33;
+let bestScore = "-";
 
-// this function loops over the array of colors
-// it creates a new div and gives it a class with the value of the color
-// it also adds an event listener for a click for each card
+function storeBestScore() {
+  if (bestScore === "-" || score > bestScore) {  // assuming a higher score is better - thhe highest number of for a given timeer
+    bestScore = score;
+    localStorage.setItem('bestScore', bestScore);
+  }
+}
+
 function createDivsForColors(colorArray) {
   for (let color of colorArray) {
-    // create a new div
     const newDiv = document.createElement("div");
-
-    counter ++;
-
-    // give it a class attribute for the value we are looping over
+    counter++;
     newDiv.classList.add(color);
-    newDiv.id =counter;
-
-    // call a function handleCardClick when a div is clicked on
+    newDiv.id = counter;
     newDiv.addEventListener("click", handleCardClick);
-
-
-
-    // append the div to the element with an id of game
     gameContainer.append(newDiv);
   }
+  const timeCounterText = document.createElement('h2');
+  timeCounterText.id = "time-counter";
+  timeCounterText.innerText = timer;
+  timeCounterText.style.color = 'red';
+  document.querySelector('div.container').prepend(timeCounterText);
 }
 
-// TODO: Implement this function!
+function displayScreen(content, buttonText, buttonAction) {
+  const newDiv = document.createElement("div");
+  const newH1 = document.createElement("h1");
+  const newH2 = document.createElement("h2");
+  const tScore = document.createElement("h2");
+  const startBtn = document.createElement("button");
 
-const  clickedCards = [];
+  newH1.id = "game-heading";
+  newH1.innerHTML = "Match -A- Beaver".replace(/ /g, "<br>");
+  newH2.innerHTML = content.text;
+  newH2.style.color = content.color;
+
+  tScore.innerHTML = content.scoreText;
+  tScore.style.color = "magenta";
+
+  startBtn.id = "start-button";
+  startBtn.classList.add("start-button");
+  startBtn.innerText = buttonText;
+  startBtn.addEventListener("click", buttonAction);
+
+  newDiv.classList.add("start-screen");
+  newDiv.appendChild(newH1);
+  if (content.text.length>0){newDiv.appendChild(newH2)};
+  newDiv.appendChild(tScore);
+  if (content.includeRange) {
+    const { newLabel, newRange, displayValue } = createRange();
+    newDiv.appendChild(newLabel);
+    newDiv.appendChild(newRange);
+    newDiv.appendChild(displayValue);
+  }
+  newDiv.appendChild(startBtn);
+  body.prepend(newDiv);
+}
+
+function startScreen() {
+  displayScreen({ text: '', scoreText: `Best Score: ${bestScore}`, color: "magenta", includeRange: true }, "START", handleButtonClick);
+}
+
+function winScreen() {
+  storeBestScore();
+  displayScreen({ text: `You Win`, scoreText:`Best Score: ${bestScore}`, color: "green", includeRange: true }, "RESTART", handleButtonClick);
+}
+
+function loseScreen() {
+  storeBestScore();
+  displayScreen({ text: `You Lose`, scoreText: `Best Score: ${bestScore}`, color: "red", includeRange: true }, "RESTART", handleButtonClick);
+}
+
+function createRange() {
+  const newLabel = document.createElement('label');
+  const newRange = document.createElement("input");
+  const displayValue = document.createElement('span');
+
+  newRange.id = 'difficulty';
+  newRange.type = 'range';
+  newLabel.setAttribute('for', 'difficulty');
+  newLabel.innerText = 'set difficulty: ';
+  newRange.value = 8;
+  newRange.min = 4;
+  newRange.max = 36;
+  newRange.step = 2;
+
+  displayValue.textContent = newRange.value;
+
+  // Add an event listener to the range input
+  newRange.addEventListener('input', function() {
+    displayValue.textContent = newRange.value;
+  });
+
+  // Return an object with the elements
+  return { newLabel, newRange, displayValue };
+}
+
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+function getRandomColors(n) {
+  const colors = [];
+  for (let i = 0; i < n; i++) {
+      colors.push(getRandomColor());
+  }
+  return colors;
+}
+
+const clickedCards = [];
 const foundCards = [];
 
+function clearGame() {
+  while (gameContainer.firstChild) {
+    gameContainer.removeChild(gameContainer.firstChild);
+  }
+  let timeCounterR = document.querySelectorAll('#time-counter');
+  timeCounterR.forEach(counter => counter.remove());
+
+
+  let startScreens = document.querySelectorAll('.start-screen');
+  startScreens.forEach(screen => screen.remove());
+}
+
+function handleButtonClick(event) {
+  const rangeValue = document.querySelector('#difficulty') ? document.querySelector('#difficulty').value : 8;
+  console.log(document.querySelector('#difficulty').value)
+  clearGame();
+  
+  console.log(rangeValue);
+  const nColors = getRandomColors(rangeValue / 2);
+  const COLORS = [].concat(...nColors.map(item => [item, item]));
+  timer = 34;
+  shuffledColors = shuffle(COLORS);
+  createDivsForColors(shuffledColors);
+  toWin = shuffledColors.length / 2;
+  document.querySelectorAll('#game div').forEach(div => div.style.backgroundColor = 'black');
+  
+  const timeCounter = setInterval(function () {
+    timer--;
+    document.querySelector('#time-counter').innerText = timer;
+    if (toWin > 0 && timer <= 0) {
+      clearInterval(timeCounter);
+      loseScreen();
+    } else if (timer <=0){
+      clearInterval(timeCounter);
+
+    }
+  }, 1000);
+  
+}
+
 function handleCardClick(event) {
-  // you can use event.target to see which element was clicked
-
   const clickedCard = event.target;
-//   console.log(clickedCards.length)
-  if (foundCards.findIndex(card => card.id === clickedCard.id) !== -1) {
-    return;
-  }
-
-  if (clickedCards.length < 2
-    && clickedCards.findIndex(card => card.id === clickedCard.id) === -1
-    ){
-
-    console.log("you just clicked", clickedCard);
+  if (foundCards.includes(clickedCard)) return;
+  if (clickedCards.length < 2 && !clickedCards.includes(clickedCard)) {
     clickedCard.style.backgroundColor = clickedCard.classList[0];
-    console.log("1", clickedCards);
     clickedCards.push(clickedCard);
-    console.log("2",clickedCards);
-    if (clickedCards.length >=2
-        && ! haveSameClassValue(clickedCards)
-        ){
-            console.log("hi", haveSameClassValue(clickedCards));
-            console.log("you just clicked", clickedCard);
-            setTimeout(function(){
-                clickedCards.forEach(div => div.style.backgroundColor = 'blue');
-                clickedCards.splice(0,clickedCards.length);
-            }, 1000);
-    
-    }
-    if (clickedCards.length >= 2
-        && haveSameClassValue(clickedCards)
-        ){
-            
-            foundCards.push(clickedCards);
-            console.log("match!");
-            console.log("you just clicked", clickedCard);
-        
-            clickedCards.splice(0,clickedCards.length);
+    if (clickedCards.length === 2) {
+      if (clickedCards[0].className === clickedCards[1].className) {
+        foundCards.push(...clickedCards);
+        score++;
+        toWin--;
+        if (toWin <= 0) winScreen();
+        clickedCards.length = 0;
+      } else {
+        setTimeout(function () {
+          clickedCards.forEach(div => div.style.backgroundColor = 'black');
+          clickedCards.length = 0;
+        }, 1000);
       }
-}
-
-// haveSameClassValue(clickedCards);
-// console.log(haveSameClassValue(clickedCards));
-
-}
-
-function displayFoundCards(cards){
-    for (let el in cards){
-        document.querySelectorAll('#game div').forEach(div => {
-            if (div.className === el.className){
-                div.style.backgroundColor = div.className;
-            } else {
-                return;
-            }
-            
-        });
-
     }
-}
-
-
-function haveSameClassValue(arr) {
-  if (arr[0].className === arr[1].className){
-    return true;
-  } else {
-    return false;
   }
 }
 
-// when the DOM loads
-createDivsForColors(shuffledColors);
+bestScore = localStorage.getItem('bestScore') || "-"; 
+startScreen();
