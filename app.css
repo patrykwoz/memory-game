@@ -17,6 +17,8 @@ body{
     border:solid;
     border-color: rgb(53, 53, 53);
     border-width: 2px;
+    background-size: cover;
+    background-position: center;
     /* box-shadow: 6px; */
   }
 

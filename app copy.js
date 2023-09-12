@@ -53,7 +53,7 @@ function displayScreen(content, buttonText, buttonAction) {
   const startBtn = document.createElement("button");
 
   newH1.id = "game-heading";
-  newH1.innerHTML = "Match Two Colors".replace(/ /g, "<br>");
+  newH1.innerHTML = "Match -A- Beaver".replace(/ /g, "<br>");
   newH2.innerHTML = content.text;
   newH2.style.color = content.color;
 
@@ -148,7 +148,6 @@ function clearGame() {
   let startScreens = document.querySelectorAll('.start-screen');
   startScreens.forEach(screen => screen.remove());
 }
-
 
 function handleButtonClick(event) {
   const rangeValue = document.querySelector('#difficulty') ? document.querySelector('#difficulty').value : 8;
